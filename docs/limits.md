@@ -53,7 +53,8 @@ code and redirecting it needs DNS interception and a certificate, does not reach
 here. The export stays declined; the import no longer shares its refusal.
 
 What this emulator records is the intention. A snapshot appears, `available`,
-carrying the name, project and tags the client gave, with no parent volume and a
+carrying the name and project the client gave — the request declares no tags,
+unlike the create beside it — with no parent volume and a
 size of zero, because no bytes moved and none could have.
 
 The divergence, stated rather than hidden: the real API refuses an object that

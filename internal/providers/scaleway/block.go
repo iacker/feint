@@ -619,12 +619,18 @@ func (p *Pack) createBlockSnapshot(w http.ResponseWriter, r *http.Request) {
 	emulator.WriteJSON(w, blockCreateStatus, p.blockSnapshotView(res))
 }
 
+// The four fields the SDK declares, and no fifth.
+//
+// ImportSnapshotFromObjectStorageRequest carries Bucket, Key, Name and
+// ProjectID in block/v1 and in block/v1alpha1 alike — no Tags, unlike the
+// CreateSnapshot request beside it. Accepting one would be surface no official
+// client can send, which is rule 4: the shapes are the SDK's, never this
+// emulator's idea of them.
 type importBlockSnapshotRequest struct {
-	Name      string    `json:"name"`
-	Bucket    string    `json:"bucket"`
-	Key       string    `json:"key"`
-	ProjectID *string   `json:"project_id"`
-	Tags      *[]string `json:"tags"`
+	Name      string  `json:"name"`
+	Bucket    string  `json:"bucket"`
+	Key       string  `json:"key"`
+	ProjectID *string `json:"project_id"`
 }
 
 // importBlockSnapshotFromObjectStorage records a snapshot imported from an
@@ -675,7 +681,10 @@ func (p *Pack) importBlockSnapshotFromObjectStorage(w http.ResponseWriter, r *ht
 	res.Attrs = map[string]any{
 		"name":    req.Name,
 		"project": project,
-		"tags":    orEmpty(slicePtr(req.Tags)),
+		// Empty, and not from the request: this door takes no tags, so the
+		// field is present and empty rather than absent — a client reading a
+		// snapshot gets the same shape whichever door made it.
+		"tags": []string{},
 		// No parent volume and no bytes: the snapshot was imported from an
 		// object this emulator does not hold, so it carries the inputs the
 		// client named and nothing it could not have observed.
